@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع التواصل</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            background: #262626;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            background: #444;
+            border-radius: 10px;
+            word-wrap: break-word;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .message .sender {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+
+        .message.abboud {
+            text-align: right;
+        }
+
+        .message.hanin {
+            text-align: left;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            background: #222;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+
+        #sendButton {
+            background: #444;
+            border: none;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا...">
+            <button id="sendButton">إرسال</button>
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // أسماء المستخدمين المسموح لهم بالدخول
+        const users = ['𝒶𝒷𝑜 𝒾𝒾𝓁𝒶𝒻', '𝑜𝓊𝓂 𝒾𝒾𝓁𝒶𝒻'];
+        const currentUser = prompt("أدخل اسمك:"); // الحصول على اسم المستخدم
+
+        // التحقق من المستخدم
+        if (!users.includes(currentUser)) {
+            alert("عذراً، لا يمكنك الدخول إلى هذه المحادثة.");
+            document.body.innerHTML = "<h1 style='color: white; text-align: center;'>تم رفض الدخول</h1>";
+            throw new Error("Unauthorized user");
+        }
+
+        // تحميل الرسائل المحفوظة
+        function loadMessages() {
+            const savedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+            savedMessages.forEach(({ message, sender }) => addMessage(message, sender, false));
+        }
+
+        // حفظ الرسائل
+        function saveMessage(message, sender) {
+            const savedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+            savedMessages.push({ message, sender });
+            localStorage.setItem('chatMessages', JSON.stringify(savedMessages));
+        }
+
+        // إضافة رسالة
+        function addMessage(message, sender, save = true) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender === '𝒶𝒷𝑜 𝒾𝒾𝓁𝒶𝒻' ? 'abboud' : 'hanin');
+
+            const senderElement = document.createElement('div');
+            senderElement.classList.add('sender');
+            senderElement.innerText = sender;
+
+            messageElement.appendChild(senderElement);
+            messageElement.innerHTML += message;
+
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            if (save) saveMessage(message, sender);
+        }
+
+        // عند الضغط على زر الإرسال
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, currentUser);
+                messageInput.value = '';
+            }
+        });
+
+        // إرسال عند الضغط على Enter
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const message = messageInput.value.trim();
+                if (message) {
+                    addMessage(message, currentUser);
+                    messageInput.value = '';
+                }
+            }
+        });
+
+        // تحميل الرسائل عند فتح الصفحة
+        loadMessages();
+    </script>
+</body>
+</html>
